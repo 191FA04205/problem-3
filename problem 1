@@ -1,0 +1,86 @@
+import java.io.*;
+
+class VersionedFile {
+    private byte[] baseVersion;
+    private List<byte[]> deltas;
+
+    // Constructor to initialize an empty VersionedFile
+    public VersionedFile() {
+        this.baseVersion = new byte[0];
+        this.deltas = new ArrayList<>();
+    }
+
+    // Method to set the base version
+    public void setBaseVersion(byte[] data) {
+        this.baseVersion = data.clone();
+    }
+
+    // Method to add a delta to the file
+    public void addDelta(byte[] delta) {
+        this.deltas.add(delta.clone());
+    }
+
+    // Method to generate any version of the file
+    public byte[] generateVersion(int versionNumber) {
+        byte[] currentVersion = baseVersion.clone();
+
+        for (int i = 0; i < versionNumber && i < deltas.size(); i++) {
+            applyDelta(currentVersion, deltas.get(i));
+        }
+
+        return currentVersion;
+    }
+
+    // Helper method to apply a delta to the base version
+    private void applyDelta(byte[] base, byte[] delta) {
+        // Implement logic to apply the delta to the base version
+        // For example, you can use libraries like Google's Protocol Buffers, JSON patch, or custom logic based on your requirements.
+        // You need to define the delta application logic based on your use case.
+    }
+
+    // Method to persist the VersionedFile to a single file
+    public void persistToFile(String filePath) throws IOException {
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            outputStream.writeObject(this);
+        }
+    }
+
+    // Method to load a VersionedFile from a file
+    public static VersionedFile loadFromFile(String filePath) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(filePath))) {
+            return (VersionedFile) inputStream.readObject();
+        }
+    }
+}
+
+public class VersioningDemo {
+    public static void main(String[] args) {
+        // Example usage
+        VersionedFile versionedFile = new VersionedFile();
+        
+        // Set the base version
+        versionedFile.setBaseVersion("Base version data".getBytes());
+
+        // Add deltas
+        versionedFile.addDelta("Delta 1".getBytes());
+        versionedFile.addDelta("Delta 2".getBytes());
+
+        // Persist to file
+        try {
+            versionedFile.persistToFile("versionedFile.dat");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Load from file
+        try {
+            VersionedFile loadedFile = VersionedFile.loadFromFile("versionedFile.dat");
+
+            // Generate any version
+            byte[] generatedVersion = loadedFile.generateVersion(2);
+            System.out.println(new String(generatedVersion));
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
