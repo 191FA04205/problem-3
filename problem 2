@@ -1,0 +1,88 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+class TrieNode {
+    Map<Character, TrieNode> children = new HashMap<>();
+    boolean isEndOfWord;
+    int count;
+}
+
+public class WordCountApplication {
+
+    private static final int MAX_RAM_SIZE = 10 * 1024 * 1024; // 10 MB
+    private static final int MAX_FILE_SIZE = 1024 * 1024 * 1024; // 1 GB
+
+    private static TrieNode root = new TrieNode();
+
+    public static void main(String[] args) {
+        try {
+            long startTime = System.currentTimeMillis();
+
+            // Read the large text file
+            readLargeFile("large_text_file.txt");
+
+            // Emit sorted words and counts
+            emitSortedWordsAndCounts();
+
+            long endTime = System.currentTimeMillis();
+            System.out.println("Execution time: " + (endTime - startTime) + " ms");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void readLargeFile(String filePath) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                processLine(line);
+            }
+        }
+    }
+
+    private static void processLine(String line) {
+        // Tokenize the line into words
+        String[] words = line.split("\\s+");
+
+        // Insert words into trie
+        for (String word : words) {
+            insertWord(word.toLowerCase()); // Convert to lowercase for case-insensitivity
+        }
+    }
+
+    private static void insertWord(String word) {
+        TrieNode currentNode = root;
+
+        for (char c : word.toCharArray()) {
+            currentNode.children.putIfAbsent(c, new TrieNode());
+            currentNode = currentNode.children.get(c);
+        }
+
+        currentNode.isEndOfWord = true;
+        currentNode.count++;
+    }
+
+    private static void emitSortedWordsAndCounts() {
+        TreeMap<String, Integer> sortedWords = new TreeMap<>();
+
+        traverseTrie(root, "", sortedWords);
+
+        // Output sorted words and counts
+        sortedWords.forEach((word, count) -> System.out.println(word + ": " + count));
+    }
+
+    private static void traverseTrie(TrieNode node, String currentWord, TreeMap<String, Integer> sortedWords) {
+        if (node.isEndOfWord) {
+            sortedWords.put(currentWord, node.count);
+        }
+
+        for (Map.Entry<Character, TrieNode> entry : node.children.entrySet()) {
+            traverseTrie(entry.getValue(), currentWord + entry.getKey(), sortedWords);
+        }
+    }
+}
