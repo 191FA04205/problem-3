@@ -1,0 +1,86 @@
+import java.util.HashMap;
+import java.util.Map;
+
+class Product {
+    String name;
+    String description;
+    double price;
+    // Other product details as needed
+
+    public Product(String name, String description, double price) {
+        this.name = name;
+        this.description = description;
+        this.price = price;
+    }
+}
+
+class Category {
+    String name;
+    // Other category details as needed
+
+    public Category(String name) {
+        this.name = name;
+    }
+}
+
+class InMemoryStorage {
+    Map<String, Product> productMap;
+    Map<String, Category> categoryMap;
+    Map<String, String> productCategoryMap;
+
+    public InMemoryStorage() {
+        productMap = new HashMap<>();
+        categoryMap = new HashMap<>();
+        productCategoryMap = new HashMap<>();
+    }
+
+    public void addProduct(String productId, String name, String description, double price, String categoryId) {
+        Product product = new Product(name, description, price);
+        productMap.put(productId, product);
+        productCategoryMap.put(productId, categoryId);
+    }
+
+    public void addCategory(String categoryId, String name) {
+        Category category = new Category(name);
+        categoryMap.put(categoryId, category);
+    }
+
+    public Product getProductById(String productId) {
+        return productMap.get(productId);
+    }
+
+    public Category getCategoryById(String categoryId) {
+        return categoryMap.get(categoryId);
+    }
+
+    public void searchProductsByKeyword(String keyword) {
+        for (Map.Entry<String, Product> entry : productMap.entrySet()) {
+            Product product = entry.getValue();
+            if (product.name.contains(keyword) || product.description.contains(keyword)) {
+                System.out.println("Product ID: " + entry.getKey() + ", Name: " + product.name +
+                        ", Description: " + product.description + ", Price: " + product.price);
+            }
+        }
+    }
+
+    // Add other search methods as needed
+
+}
+
+public class Main {
+    public static void main(String[] args) {
+        InMemoryStorage storage = new InMemoryStorage();
+
+        storage.addCategory("1", "Electronics");
+        storage.addProduct("101", "Laptop", "Powerful laptop for professional use", 999.99, "1");
+        storage.addProduct("102", "Smartphone", "Latest smartphone with advanced features", 499.99, "1");
+
+        storage.addCategory("2", "Books");
+        storage.addProduct("201", "Java Programming", "Comprehensive guide to Java programming", 49.99, "2");
+        storage.addProduct("202", "Artificial Intelligence", "Exploring the world of AI", 39.99, "2");
+
+        // Search for products containing the keyword "smartphone"
+        System.out.println("Search results for 'smartphone':");
+        storage.searchProductsByKeyword("smartphone");
+    }
+}
